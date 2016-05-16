@@ -1,4 +1,4 @@
-function handleFileSelectOLD(evt) {
+/*function handleFileSelectOLD(evt) {
 	fileDisplayArea.innerText = "";
 	var files = evt.target.files[0];
 	var fileType = /.x3d./;
@@ -43,8 +43,7 @@ if (typeof window.DOMParser != "undefined") {
 	};
 } else {
 	throw new Error("No XML parser found");
-}
-
+}*/
 function getCoordinates(xmlDocu) {
 	var indexes = xmlDocu.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
 	indexes = indexes.split(" ");
@@ -64,7 +63,7 @@ function getCoordinates(xmlDocu) {
 			}
 		}
 	}
-	//alert("FullCoords: " +fullCoords);
+	//alert("FullCoords: " +fullCoords.length);
 	return fullCoords;
 }
 function getIndexes () {
@@ -128,9 +127,46 @@ function getNormals(xml) {
 function getColor(xml) {
 	
 	var mater = xml.getElementsByTagName('Material');
-	color = mater[0].getAttribute('diffuseColor');
-	color = color.replace(/ /g, ",");
-	color = color.replace(/\.0/g, "");
-	//alert(color);
-	return color;
+	var color = mater[0].getAttribute('diffuseColor');
+	var colorTable = [];
+	if(color == null) {
+		colorTable = [1,1,0];
+	} else
+		colorTable = color.split(" ");
+	return colorTable;
+}
+function getMinMax(xml) {
+	var minX=0, minY=0, minZ=0, maxX=0, maxY=0, maxZ=0;
+	var coords = [];
+	coords = xml.getElementsByTagName('Coordinate')[0].getAttribute('point');
+	coords = coords.split(" ");
+	for(i in coords) {
+		if (i % 3 == 0) {
+			if (coords[i]<minX) {
+				minX=coords[i];
+			}else if (coords[i]>maxX) {
+				maxX=coords[i];
+			}
+		}else if (i % 2 == 0) {
+			if (coords[i]<minZ) {
+				minZ=coords[i];
+			}else if (coords[i]>maxZ) {
+				maxZ=coords[i];
+			}
+		}else if (i % 1 == 0) {
+			if (coords[i]<minY) {
+				minY=coords[i];
+			}else if (coords[i]>maxY) {
+				maxY=coords[i];
+			}
+		}
+	}
+	minX = parseInt(minX);
+	minY = parseInt(minY);
+	minZ = parseInt(minZ);
+	maxX = parseInt(maxX);
+	maxY = parseInt(maxY);
+	maxZ = parseInt(maxZ);
+	
+	return [((maxX+minX)/2), ((maxY+minY)/2), ((maxZ+minZ)/2)];
 }

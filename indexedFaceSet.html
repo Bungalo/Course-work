@@ -69,6 +69,7 @@
 	var coordsFromXML;
 	var colorFromXML;
 	var normalsFromXML;
+	var minMaxCoords;
     function initGL(canvas) {
         try {
             gl = canvas.getContext("experimental-webgl");
@@ -332,6 +333,7 @@
 		for(i = 0; i<cubeVertexPositionBuffer.numItems;i++) {
 			cubeVertexIndices.push(i);
 		}
+		//alert(cubeVertexIndices.length);
 		//alert(cubeVertexIndices+" "+cubeVertexIndices.length);
 		/*var cubeVertexIndices = [
 		
@@ -423,8 +425,11 @@
 		gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 		var colorVals = [];
 		for (var i=0; i < cubeVertexPositionBuffer.numItems; i++) {
-			colorVals= colorVals.concat(colorFromXML.split(","));
+			colorVals.push(colorFromXML[0]);
+			colorVals.push(colorFromXML[1]);
+			colorVals.push(colorFromXML[2]);
 		}
+		
 		/*var colorVals = [
 		//Bottom2
 		1.0, 0.0, 1.0,
@@ -453,7 +458,7 @@
 		];*/
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorVals), gl.STATIC_DRAW);
 		colorBuffer.itemSize = 3;
-		colorBuffer.numItems = 18;
+		colorBuffer.numItems = cubeVertexPositionBuffer.numItems;
 		
 		
     }
@@ -462,7 +467,7 @@
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+        mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
 
         mat4.identity(mvMatrix);
 		//Starting coordinates for viewport
@@ -477,11 +482,11 @@
 		//mat4.multiply(mvMatrix, mvMatrix, startingRotationMatrix);
 		
 		//Make shape spin around it's own center. Move, rotate, move back
-		vec3.set(translationVar, 2.5, 2.0, 2.5);
+		vec3.set(translationVar, minMaxCoords[0], minMaxCoords[1], minMaxCoords[2]);
         mat4.translate(mvMatrix, mvMatrix, translationVar);
 		//Take into account the rotations from mouse movements
 		mat4.multiply(mvMatrix, mvMatrix, triangleRotationMatrix);
-		vec3.set(translationVar, -2.5, -2.0, -2.5);
+		vec3.set(translationVar, -1*minMaxCoords[0], -1*minMaxCoords[1], -1*minMaxCoords[2]);
         mat4.translate(mvMatrix, mvMatrix, translationVar);
 
 
@@ -561,7 +566,9 @@
 				coordsFromXML = getCoordinates(xml);
 				normalsFromXML = getNormals(xml);
 				colorFromXML = getColor(xml);
-				//alert("Coords: "+coordsFromXML);
+				indexesFromXML = getIndexes();
+				minMaxCoords = getMinMax(xml);
+				//alert(minMaxCoords);
 				webGLStart();
 			}
 			reader.readAsText(files);

@@ -20,7 +20,7 @@
           <Coordinate point='0 0 0 5 0 0 5 0 5 0 0 5 2.5 5 2.5'/>
         </IndexedFaceSet>
         <Appearance>
-          <Material diffuseColor='0.8 0.8 0.2' specularColor='0 0 0.5'/>
+          <Material diffuseColor='0.8 1.0 1.0' specularColor='0 0 0.5'/>
         </Appearance>
       </Shape>
     </Transform>
