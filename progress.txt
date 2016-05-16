@@ -1,4 +1,4 @@
 Tee indexedfaceset toteutus. Parseta koordinaatit .x3d filesta, laske normaalit koordinaateista.
 glmatrixissa on valmiit funktiot, testaa mita tarvitaan.
 
-Miks kolmio pyörii yhen kulman ympäri eikä keskikohan, miks värit ei oo oikein(jotakin tekemistä indexien kanssa)
+Pyramidi toimii, tee numItemseista skaalautuvat, sitten testaa toisella pyramidilla ja cowilla.

@@ -1,4 +1,4 @@
-function handleFileSelect(evt) {
+function handleFileSelectOLD(evt) {
 	fileDisplayArea.innerText = "";
 	var files = evt.target.files[0];
 	var fileType = /.x3d./;
@@ -45,10 +45,14 @@ if (typeof window.DOMParser != "undefined") {
 	throw new Error("No XML parser found");
 }
 
-function getCoordinates() {
-	var indexes = [0, 1, 2, -1, 0, 2, 3, -1, 1, 0, 4, -1, 0, 3, 4, -1, 3, 2, 4, -1, 2, 1, 4, -1];
-	var coords = [0, 0, 0, 5, 0, 0, 5, 0, 5, 0, 0, 5, 2.5, 5, 2.5,];
-
+function getCoordinates(xmlDocu) {
+	var indexes = xmlDocu.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
+	indexes = indexes.split(" ");
+	var coords = [];
+	coords = xmlDocu.getElementsByTagName('Coordinate')[0].getAttribute('point');
+	coords = coords.split(" ");
+	//alert("Indexes: "+indexes+" "+indexes.length);
+	//alert("Coords: "+coords+" "+coords.length);
 	var counter = 0;
 	var fullCoords = [];
 	for (var i in indexes) {
@@ -60,6 +64,7 @@ function getCoordinates() {
 			}
 		}
 	}
+	//alert("FullCoords: " +fullCoords);
 	return fullCoords;
 }
 function getIndexes () {
@@ -69,12 +74,16 @@ function getIndexes () {
 			indexes.splice(i,1);
 		}
 	}
+	//alert("GetIndexes: "+indexes + " " + indexes.length);
 	return indexes;
 }
 
-function getNormals() {
-	var indexes = [0, 1, 2, -1, 0, 2, 3, -1, 1, 0, 4, -1, 0, 3, 4, -1, 3, 2, 4, -1, 2, 1, 4, -1];
-	var coords = [0, 0, 0, 5, 0, 0, 5, 0, 5, 0, 0, 5, 2.5, 5, 2.5,];
+function getNormals(xml) {
+	var indexes = xml.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
+	indexes = indexes.split(" ");
+	var coords = [];
+	coords = xml.getElementsByTagName('Coordinate')[0].getAttribute('point');
+	coords = coords.split(" ");
 	var counter = 0;
 	var fullCoords = [];
 	for (var i in indexes) {
@@ -115,4 +124,13 @@ function getNormals() {
 		normals.push(normal[2]);
 	}
 	return normals;
+}
+function getColor(xml) {
+	
+	var mater = xml.getElementsByTagName('Material');
+	color = mater[0].getAttribute('diffuseColor');
+	color = color.replace(/ /g, ",");
+	color = color.replace(/\.0/g, "");
+	//alert(color);
+	return color;
 }
