@@ -472,7 +472,7 @@
         mat4.identity(mvMatrix);
 		//Starting coordinates for viewport
 		var translationVar = vec3.create();
-		vec3.set(translationVar, -2.5, -2.1, zoom);
+		vec3.set(translationVar, 0, 0, zoom);
         mat4.translate(mvMatrix, mvMatrix, translationVar);
 
 		//Starting point for beginning rotation, still needs to be fixed
