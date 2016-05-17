@@ -136,37 +136,43 @@ function getColor(xml) {
 	return colorTable;
 }
 function getMinMax(xml) {
-	var minX=0, minY=0, minZ=0, maxX=0, maxY=0, maxZ=0;
+	//Get the minimum and maximum coordinates of the object. Coordinates are used
+	//to perform the inital translation, so that the object would be in view immediately
 	var coords = [];
 	coords = xml.getElementsByTagName('Coordinate')[0].getAttribute('point');
 	coords = coords.split(" ");
+	var minX=coords[0], minY=coords[1], minZ=coords[2], maxX=coords[0], maxY=coords[1], maxZ=coords[2];
+	var counter = 0;
 	for(i in coords) {
-		if (i % 3 == 0) {
+		if (counter == 0) {
+			counter++;
 			if (coords[i]<minX) {
 				minX=coords[i];
 			}else if (coords[i]>maxX) {
 				maxX=coords[i];
 			}
-		}else if (i % 2 == 0) {
-			if (coords[i]<minZ) {
-				minZ=coords[i];
-			}else if (coords[i]>maxZ) {
-				maxZ=coords[i];
-			}
-		}else if (i % 1 == 0) {
+		}else if (counter == 1) {
+			counter++;
 			if (coords[i]<minY) {
 				minY=coords[i];
 			}else if (coords[i]>maxY) {
 				maxY=coords[i];
 			}
+		}else if (counter == 2) {
+			counter = 0;
+			if (coords[i]<minZ) {
+				minZ=coords[i];
+			}else if (coords[i]>maxZ) {
+				maxZ=coords[i];
+			}
 		}
 	}
-	minX = parseInt(minX);
-	minY = parseInt(minY);
-	minZ = parseInt(minZ);
-	maxX = parseInt(maxX);
-	maxY = parseInt(maxY);
-	maxZ = parseInt(maxZ);
-	
-	return [((maxX+minX)/2), ((maxY+minY)/2), ((maxZ+minZ)/2)];
+	minX = parseFloat(minX);
+	minY = parseFloat(minY);
+	minZ = parseFloat(minZ);
+	maxX = parseFloat(maxX);
+	maxY = parseFloat(maxY);
+	maxZ = parseFloat(maxZ);
+	//alert(maxX+" "+minX +" "+" "+ maxY+" "+minY+" "+ maxZ+" "+minZ);
+	return [((maxX+minX)/2.0), ((maxY+minY)/2.0), ((maxZ+minZ)/2.0)];
 }

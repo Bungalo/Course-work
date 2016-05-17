@@ -1,6 +1,12 @@
+﻿TASK:
 Tee indexedfaceset toteutus. Parseta koordinaatit .x3d filesta, laske normaalit koordinaateista.
 glmatrixissa on valmiit funktiot, testaa mita tarvitaan.
 
-Pyramidi toimii, tee numItemseista skaalautuvat, sitten testaa toisella pyramidilla ja cowilla.
+TODO:
 
-Asiat piirtyy, selvit� miten modelin saa automaagisesti viewin keskelle. Ja zoomin skaalaus
+Zoomin skaalaus, valon suunta, väri ja intensiteetti.
+
+DONE:
+
+Pyramidi toimii, tee numItemseista skaalautuvat, sitten testaa toisella pyramidilla ja cowilla.
+Asiat piirtyy, selvitд miten modelin saa automaagisesti viewin keskelle.
