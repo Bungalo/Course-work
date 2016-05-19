@@ -10,3 +10,4 @@ DONE:
 
 Pyramidi toimii, tee numItemseista skaalautuvat, sitten testaa toisella pyramidilla ja cowilla.
 Asiat piirtyy, selvitд miten modelin saa automaagisesti viewin keskelle.
+FPS

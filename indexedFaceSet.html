@@ -1,6 +1,15 @@
 <html>
 
 <head>
+<style>
+
+canvas {
+	float:left;
+}
+#fps {
+	font-size: 20
+}
+</style>
 <title>Oma WebGL</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
@@ -543,7 +552,7 @@
 		gl.uniform1i(shaderProgram.useLightingUniform, true);
 		gl.uniform3f(shaderProgram.ambientColorUniform, 0.625, 0.390625, 0.0);
         gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.3, 0.9, 1.0);
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.8, 0.8 , 0.8);
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
         setMatrixUniforms();
@@ -552,16 +561,46 @@
 		
 		
     }
-
+	var then = 0;
+	//Interval for updating fps value on the page, seconds
+	var fpsUpdateInterval = 0.5;
+	var fpsStartTime = 0;
     function tick() {
-        requestAnimFrame(tick);
-		handleKeys();
-        drawScene();
-    }
 
+		window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame ||
+		  window.webkitRequestAnimationFrame ||
+		  window.mozRequestAnimationFrame    ||
+		  window.ieRequestAnimationFrame     ||
+		  function( callback ){
+			window.setTimeout(callback, 1000 / 60);
+		  };
+		})();
+		
+		var fpsElement = document.getElementById("fps");
+		var elapsedTime = 0;
+		var fpsElapsedTime = 0;
+		var now = Date.now() / 1000;  // get time in seconds
+		// compute time since last frame
+		elapsedTime = now - then;
+		then = now;
+		//alert("First: "+fpsElapsedTime);
+		fpsElapsedTime = now-fpsStartTime;;
+		//alert("Second: "+fpsElapsedTime);
+		// Check if enough time has passed, compute fps and display it on the page
+		
+		if(fpsElapsedTime > fpsUpdateInterval) {
+			var fps = 1 / elapsedTime;
+			fpsElement.innerText = fps.toFixed(0);
+			fpsStartTime = Date.now() / 1000;
+		}
+		handleKeys();
+		drawScene();
+		requestAnimFrame(tick);
+	}
 
     function webGLStart() {
-        var canvas = document.getElementById("lesson07-canvas");
+        var canvas = document.getElementById("canvas-for-webgl");
         initGL(canvas);
         initShaders();
         initBuffers();
@@ -576,8 +615,8 @@
 		document.onmousemove = handleMouseMove;
 		document.onkeydown = handleKeyDown;
 		document.onkeyup = handleKeyUp;
-		
-		
+		// Get time in seconds for fps counter
+		then = Date.now() / 1000;  
         tick();
 	}
 	function getReady() {
@@ -625,6 +664,7 @@ if (typeof window.DOMParser != "undefined") {
 } else {
 	throw new Error("No XML parser found");
 }
+
 </script>
 
 </head>
@@ -632,18 +672,18 @@ if (typeof window.DOMParser != "undefined") {
 
 <body onload="getReady()"><br />
 
-    <canvas id="lesson07-canvas" style="border: none;" width="500" height="500"></canvas>
-
-    <br />
-    Use the mouse to spin the shape
+    <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
+	<p>	&nbsp&nbsp&nbsp Use the mouse to spin the shape
+	<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
+    <br/>
+    
 
     <br/><br/><br/><br/><br/><br/>
 <form id="upload_form">
 <input type="file" id="files" name="files[]"/>
 </form>
 <output id="fileDisplayArea"></output>
-<script type="text/javascript">
-</script>
+
 </body>
 
 </html>
