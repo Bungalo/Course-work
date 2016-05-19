@@ -4,10 +4,15 @@ glmatrixissa on valmiit funktiot, testaa mita tarvitaan.
 
 TODO:
 
-Zoomin skaalaus, valon suunta, väri ja intensiteetti.
+Parseta alkuarvot valolle x3dsta.
+Näppisliikutuksen skaalaus(toimii periaatteessa, ihme error kun lataa monta modelia ilman refreshia.)
 
 DONE:
 
 Pyramidi toimii, tee numItemseista skaalautuvat, sitten testaa toisella pyramidilla ja cowilla.
 Asiat piirtyy, selvitд miten modelin saa automaagisesti viewin keskelle.
 FPS
+Jos avaa suoraan toisen tiedoston, rotaatiot ja sijainti resetoituu
+Zoomin skaalaus
+Reset-nappi
+Valon suunta, väri ja intensiteetti.

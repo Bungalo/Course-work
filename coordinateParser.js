@@ -156,6 +156,7 @@ function getMinMax(xml) {
 	maxX = parseFloat(maxX);
 	maxY = parseFloat(maxY);
 	maxZ = parseFloat(maxZ);
+	var initialZoom = -1*(maxX+maxY+maxZ-minX-minY-minZ);
 	//alert(maxX+" "+minX +" "+" "+ maxY+" "+minY+" "+ maxZ+" "+minZ);
-	return [((maxX+minX)/2.0), ((maxY+minY)/2.0), ((maxZ+minZ)/2.0)];
+	return [((maxX+minX)/2.0), ((maxY+minY)/2.0), ((maxZ+minZ)/2.0), initialZoom];
 }
