@@ -4,8 +4,9 @@ glmatrixissa on valmiit funktiot, testaa mita tarvitaan.
 
 TODO:
 
-Parseta alkuarvot valolle x3dsta.
-Näppisliikutuksen skaalaus(toimii periaatteessa, ihme error kun lataa monta modelia ilman refreshia.)
+Secular light
+(Parseta alkuarvot valolle x3dsta.)
+Näppisliikutuksen skaalaus(toimii periaatteessa, kiihtyy joka kerta kun lataa monta modelia ilman refreshia.)
 
 DONE:
 
@@ -16,3 +17,4 @@ Jos avaa suoraan toisen tiedoston, rotaatiot ja sijainti resetoituu
 Zoomin skaalaus
 Reset-nappi
 Valon suunta, väri ja intensiteetti.
+Tee sliderit valolle
