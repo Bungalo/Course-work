@@ -16,7 +16,6 @@ canvas {
 
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="parseXml.js"></script>
 <script type="text/javascript" src="coordinateParser.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -620,7 +619,22 @@ canvas {
 		handleKeys();
 		drawScene();
 		requestAnimFrame(tick);
+		animate();
 	}
+	
+	var lastTime = 0;
+	var xRot = 0;
+    function animate() {
+        var timeNow = new Date().getTime();
+        if (lastTime != 0) {
+            var elapsed = timeNow - lastTime;
+			var newRotationMatrix = mat4.create();
+            xRot = (90 * elapsed) / 1000.0;
+			mat4.rotate(triangleRotationMatrix, triangleRotationMatrix, degToRad(xRot), [0,1,0]);
+        }
+        lastTime = timeNow;
+    }
+	
     function webGLStart() {
 		var canvas = document.getElementById("canvas-for-webgl");
         initGL(canvas);
