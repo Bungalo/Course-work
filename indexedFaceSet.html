@@ -613,7 +613,7 @@ canvas {
 		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
-			fpsElement.innerText = fps.toFixed(0);
+			fpsElement.textContent = fps.toFixed(0);
 			fpsStartTime = Date.now() / 1000;
 		}
 		handleKeys();
@@ -687,7 +687,7 @@ canvas {
 		document.getElementById("ambientB").value="0.2";
 	}
 	function handleFileSelect(evt) {
-		fileDisplayArea.innerText = "";
+		fileDisplayArea.textContent = "";
 		var files = evt.target.files[0];
 		var fileType = /.x3d./;
 		xml = "";
@@ -718,7 +718,7 @@ canvas {
 			}
 			reader.readAsText(files);
 	} else {
-		fileDisplayArea.innerText = "Only .x3d supported!"
+		fileDisplayArea.textContent = "Only .x3d supported!"
 	}
 }
 	
