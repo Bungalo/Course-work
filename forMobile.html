@@ -4,7 +4,6 @@
 <style>
 
 canvas {
-	float:left;
 }
 #fps {
 	font-size: 20;
@@ -16,7 +15,7 @@ canvas {
 
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="coordinateParser.js"></script>
+<script type="text/javascript" src="mobile.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -568,6 +567,15 @@ canvas {
                 parseFloat(document.getElementById("directionalB").value)
             );
         }
+		document.getElementById("ShowDirectionX").value=document.getElementById("lightDirectionX").value;
+			document.getElementById("ShowDirectionY").value=document.getElementById("lightDirectionY").value;
+			document.getElementById("ShowDirectionZ").value=document.getElementById("lightDirectionZ").value;
+			document.getElementById("ShowColorR").value=document.getElementById("directionalR").value;
+			document.getElementById("ShowColorG").value=document.getElementById("directionalG").value;
+			document.getElementById("ShowColorB").value=document.getElementById("directionalB").value;
+			document.getElementById("ShowAmbientR").value=document.getElementById("ambientR").value;
+			document.getElementById("ShowAmbientG").value=document.getElementById("ambientG").value;
+			document.getElementById("ShowAmbientB").value=document.getElementById("ambientB").value;
 		/*var adjustedLD = vec3.create();
         vec3.normalize(adjustedLD, [0, 0, 1.0]);
         vec3.scale(adjustedLD, adjustedLD, -1);
@@ -654,9 +662,8 @@ canvas {
 		then = Date.now() / 1000;  
         tick();
 	}
-	function getReady() {
-		document.getElementById('files').addEventListener('change', handleFileSelect, false);
-		document.getElementById("upload_form").reset();
+	function getReady(selection) {
+		handleFileSelect(selection);
 		var obj = document.getElementById('canvas-for-webgl');
 		obj.addEventListener('touchmove', function(event) {
 		  // If there's exactly one finger inside this element
@@ -686,40 +693,27 @@ canvas {
 		document.getElementById("ambientG").value="0.2";
 		document.getElementById("ambientB").value="0.2";
 	}
-	function handleFileSelect(evt) {
-		fileDisplayArea.textContent = "";
-		var files = evt.target.files[0];
-		var fileType = /.x3d./;
-		xml = "";
-		if (files.type.match(fileType)) {
-			var reader = new FileReader();
-
-			reader.onload = function(e) {
-				xml = parseXml(reader.result);
-				coordsFromXML = getCoordinates(xml);
-				normalsFromXML = getNormals(xml);
-				colorFromXML = getColor(xml);
-				//indexesFromXML = getIndexes();
-				minMaxCoords = getMinMax(xml);
-				resetValues();
-				//Initial zoom is stored in fourth index of the table
-				zoom = minMaxCoords[3];
-				if(zoom < -20) {
-					zoom *=2.8;
-				}
-				scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
-				if (scaleOfZoom > 1) {
-					scaleOfZoom *= 1.5;
-				}
-				amountOfMovement = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/50.0;
-				//alert(amountOfMovement);
-				
-				webGLStart();
-			}
-			reader.readAsText(files);
-	} else {
-		fileDisplayArea.textContent = "Only .x3d supported!"
-	}
+	function handleFileSelect(selection) {
+		
+		coordsFromXML = getCoordinates(selection);
+		normalsFromXML = getNormals(selection);
+		colorFromXML = getColor(selection);
+		//indexesFromXML = getIndexes();
+		minMaxCoords = getMinMax(selection);
+		resetValues();
+		//Initial zoom is stored in fourth index of the table
+		zoom = minMaxCoords[3];
+		if(zoom < -20) {
+			zoom *=2.8;
+		}
+		scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
+		if (scaleOfZoom > 1) {
+			scaleOfZoom *= 1.5;
+		}
+		amountOfMovement = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/50.0;
+		//alert(amountOfMovement);
+		
+		webGLStart();
 }
 	
 var parseXml;
@@ -745,50 +739,69 @@ if (typeof window.DOMParser != "undefined") {
 </head>
 
 
-<body onload="getReady()"><br />
-
+<body onload="getReady('pyramid')"><br />
+	
     <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
-	<p>	&nbsp&nbsp&nbsp Use the mouse to spin the shape
+	<button type="button" onclick="resetValues()">Reset</button>
+	<p>
+	<button type="button" onclick="getReady('bacteria')">Bacteria</button>
+	<button type="button" onclick="getReady('cow')">Cow</button>
+	<button type="button" onclick="getReady('pyramid')">Pyramid</button>
+	<p>	&nbsp&nbsp&nbsp Use the buttons to change the model
 	<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
     <br/>
     
 
     <br/><br/><br/>
-<form id="upload_form">
-<input type="file" id="files" name="files[]"/>
-</form>
-<output id="fileDisplayArea"></output>
-<button type="button" onclick="resetValues()">Reset</button>
+
 <h2>Directional light:</h2>
 
     <table style="border: 0; padding: 10px;">
         <tr>
-            <td><b>Direction:</b>
-            <td>X: <input type="text" id="lightDirectionX" value="-0.25" />
-            <td>Y: <input type="text" id="lightDirectionY" value="-0.25" />
-            <td>Z: <input type="text" id="lightDirectionZ" value="-1.0" />
-        </tr>
+			<td><b>Direction:</b>
+			<td>X: <input type="text" id="ShowDirectionX" disabled="disabled" value="" />
+			<td>Y: <input type="text" id="ShowDirectionY" disabled="disabled" value="" />
+			<td>Z: <input type="text" id="ShowDirectionZ" disabled="disabled" value="" />
+		
+		</tr>
         <tr>
-            <td><b>Colour:</b>
-            <td>R: <input type="text" id="directionalR" value="0.8" />
-            <td>G: <input type="text" id="directionalG" value="0.8" />
-            <td>B: <input type="text" id="directionalB" value="0.8" />
+			<td><b></b>
+            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionX" value="-0.25" />
+            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionY" value="-0.25" />
+            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionZ" value="-1.0" />
+        </tr>
+		<tr>
+			<td><b>Colour:</b>
+			<td>R: <input type="text" id="ShowColorR" disabled="disabled" value="" />
+			<td>G: <input type="text" id="ShowColorG" disabled="disabled" value="" />
+			<td>B: <input type="text" id="ShowColorB" disabled="disabled" value="" />
+		
+		</tr>
+        <tr>
+            <td><b></b>
+            <td><input type="range" min="0" max="1" step="0.1" id="directionalR" value="0.8" />
+            <td><input type="range" min="0" max="1" step="0.1" id="directionalG" value="0.8" />
+            <td><input type="range" min="0" max="1" step="0.1" id="directionalB" value="0.8" />
         </tr>
     </table>
 
     <h2>Ambient light:</h2>
     <table style="border: 0; padding: 10px;">
+		<tr>
+			<td><b>Colour:</b>
+			<td>R: <input type="text" id="ShowAmbientR" disabled="disabled" value="" />
+			<td>G: <input type="text" id="ShowAmbientG" disabled="disabled" value="" />
+			<td>B: <input type="text" id="ShowAmbientB" disabled="disabled" value="" />
+		
+		</tr>
         <tr>
-            <td><b>Colour:</b>
-            <td>R: <input type="text" id="ambientR" value="0.2" />
-            <td>G: <input type="text" id="ambientG" value="0.2" />
-            <td>B: <input type="text" id="ambientB" value="0.2" />
+            <td><b></b>
+            <td><input type="range" min="0" max="1" step="0.1" id="ambientR" value="0.2" />
+            <td><input type="range" min="0" max="1" step="0.1" id="ambientG" value="0.2" />
+            <td><input type="range" min="0" max="1" step="0.1" id="ambientB" value="0.2" />
         </tr>
     </table>
 	<input type="checkbox" id="lighting" checked /> Use lighting<br/>
-	<button type="button" onclick="">Bacteria</button>
-	<button type="button" onclick="resetValues()">Cow</button>
-	<button type="button" onclick="resetValues()">Pyramid</button>
 </body>
 
 </html>
