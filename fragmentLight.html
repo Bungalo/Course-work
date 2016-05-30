@@ -66,8 +66,10 @@ canvas {
         } else {
             vec3 transformedNormal = uNMatrix * aVertexNormal;
             float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-            vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-        }
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+			//vec3 gamma = vec3(1.0/2.2);
+			//vLightWeighting = vec3(pow(linearColor, gamma));
+		}
     }
 </script>
 
@@ -788,6 +790,9 @@ canvas {
 				coordsFromXML = getCoordinates(xml);
 				normalsFromXML = getNormals(xml);
 				colorFromXML = getColor(xml);
+				for(var i in colorFromXML) {
+					colorFromXML[i] *=1.9;
+				}
 				indexesFromXML = getIndexes();
 				minMaxCoords = getMinMax(xml);
 				resetValues();
@@ -860,9 +865,9 @@ if (typeof window.DOMParser != "undefined") {
 		</tr>
         <tr>
 			<td><b></b>
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionX" value="-0.25" />
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionY" value="-0.25" />
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionZ" value="-1.0" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionX" value="-0.25" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionY" value="-0.25" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionZ" value="-1.0" />
         </tr>
 		<tr>
 			<td><b>Colour:</b>
