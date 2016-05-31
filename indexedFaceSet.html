@@ -613,6 +613,9 @@ canvas {
 		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
+			if (fps > 60) {
+				fps = 60.0;
+			}
 			fpsElement.textContent = fps.toFixed(0);
 			fpsStartTime = Date.now() / 1000;
 		}
@@ -644,7 +647,10 @@ canvas {
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-		document.onwheel = handleMouseWheel;
+		canvas.onwheel = function(event){
+			handleMouseWheel(event);
+			event.preventDefault();
+		};
 		canvas.onmousedown = handleMouseDown;
 		document.onmouseup = handleMouseUp;
 		document.onmousemove = handleMouseMove;
@@ -699,6 +705,10 @@ canvas {
 				coordsFromXML = getCoordinates(xml);
 				normalsFromXML = getNormals(xml);
 				colorFromXML = getColor(xml);
+				var brightness = getBrightness(xml);
+				for(var i in colorFromXML) {
+					colorFromXML[i] *= brightness;
+				}
 				//indexesFromXML = getIndexes();
 				minMaxCoords = getMinMax(xml);
 				resetValues();

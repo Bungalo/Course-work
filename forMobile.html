@@ -593,10 +593,10 @@ canvas {
     }
 	var then = 0;
 	//Interval for updating fps value on the page, seconds
-	var fpsUpdateInterval = 0.5;
+	var fpsUpdateInterval = 1.0;
 	var fpsStartTime = 0;
     function tick() {
-
+		requestAnimFrame(tick);
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame ||
 		  window.webkitRequestAnimationFrame ||
@@ -621,12 +621,14 @@ canvas {
 		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
+			if (fps > 60) {
+				fps = 60.0;
+			}
 			fpsElement.textContent = fps.toFixed(0);
 			fpsStartTime = Date.now() / 1000;
 		}
 		handleKeys();
 		drawScene();
-		requestAnimFrame(tick);
 		animate();
 	}
 	
@@ -652,28 +654,23 @@ canvas {
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-		document.onwheel = handleMouseWheel;
+		//window.onwheel = function(){ return false; }
+		canvas.onwheel = function(event){
+			handleMouseWheel(event);
+			event.preventDefault();
+		}; 
 		canvas.onmousedown = handleMouseDown;
 		document.onmouseup = handleMouseUp;
 		document.onmousemove = handleMouseMove;
 		document.onkeydown = handleKeyDown;
 		document.onkeyup = handleKeyUp;
+		
 		// Get time in seconds for fps counter
 		then = Date.now() / 1000;  
         tick();
 	}
 	function getReady(selection) {
 		handleFileSelect(selection);
-		var obj = document.getElementById('canvas-for-webgl');
-		obj.addEventListener('touchmove', function(event) {
-		  // If there's exactly one finger inside this element
-		  if (event.targetTouches.length == 1) {
-			var touch = event.targetTouches[0];
-			// Place element where the finger is
-			obj.style.left = touch.pageX + 'px';
-			obj.style.top = touch.pageY + 'px';
-		  }
-		}, false);
 		resetValues();
 	}
 	function resetValues() {
@@ -698,6 +695,15 @@ canvas {
 		coordsFromXML = getCoordinates(selection);
 		normalsFromXML = getNormals(selection);
 		colorFromXML = getColor(selection);
+		var brightness = 0;
+		if (selection === "cow") {
+			brightness = 1.9;
+		} else {
+			brightness = 1;
+		}
+		for(var i in colorFromXML) {
+			colorFromXML[i] *= brightness;
+		}
 		//indexesFromXML = getIndexes();
 		minMaxCoords = getMinMax(selection);
 		resetValues();
@@ -743,12 +749,13 @@ if (typeof window.DOMParser != "undefined") {
 	
     <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
 	<button type="button" onclick="resetValues()">Reset</button>
+	<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
 	<p>
 	<button type="button" onclick="getReady('bacteria')">Bacteria</button>
 	<button type="button" onclick="getReady('cow')">Cow</button>
 	<button type="button" onclick="getReady('pyramid')">Pyramid</button>
 	<p>	&nbsp&nbsp&nbsp Use the buttons to change the model
-	<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
+	
     <br/>
     
 

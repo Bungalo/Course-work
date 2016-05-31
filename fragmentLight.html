@@ -717,7 +717,7 @@ canvas {
 		var fpsElement = document.getElementById("fps");
 		var elapsedTime = 0;
 		var fpsElapsedTime = 0;
-		var now = Date.now() / 1000;  // get time in seconds
+		var now = Date.now() / 1000.0;  // get time in seconds
 		// compute time since last frame
 		elapsedTime = now - then;
 		then = now;
@@ -728,8 +728,11 @@ canvas {
 		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
+			if (fps >60) {
+				fps = 60.0;
+			}
 			fpsElement.textContent= fps.toFixed(0);
-			fpsStartTime = Date.now() / 1000;
+			fpsStartTime = Date.now() / 1000.0;
 		}
 		handleKeys();
 		drawScene();
@@ -745,7 +748,10 @@ canvas {
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-		document.onwheel = handleMouseWheel;
+		canvas.onwheel = function(event){
+			handleMouseWheel(event);
+			event.preventDefault();
+		};
 		canvas.onmousedown = handleMouseDown;
 		document.onmouseup = handleMouseUp;
 		document.onmousemove = handleMouseMove;
@@ -790,10 +796,10 @@ canvas {
 				coordsFromXML = getCoordinates(xml);
 				normalsFromXML = getNormals(xml);
 				colorFromXML = getColor(xml);
+				var brightness = getBrightness(xml);
 				for(var i in colorFromXML) {
-					colorFromXML[i] *=1.9;
+					colorFromXML[i] *= brightness;
 				}
-				indexesFromXML = getIndexes();
 				minMaxCoords = getMinMax(xml);
 				resetValues();
 				//Initial zoom is stored in fourth index of the table

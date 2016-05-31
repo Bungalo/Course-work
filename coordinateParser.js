@@ -118,6 +118,38 @@ function getColor(xml) {
 		colorTable = color.split(" ");
 	return colorTable;
 }
+//Scale the brightness of light depending on if there are added lightsources in the scene
+//In this implementation brightness of 1 is no change, 1.9 is the coefficient that matches
+//X3D.
+function getBrightness(xml) {
+	var intensity = 0;
+	var light = xml.getElementsByTagName('DirectionalLight');
+	//If no added lights, colors are displayed without modification to brightness
+	if (!light.length) {
+		intensity = 1;
+	} else {
+		//If we have an added directional light, get intensity value
+		intensity = light[0].getAttribute('intensity');
+		//If there is no intensity value, set the value to X3D default
+		if(!intensity) {
+			intensity = 1.9;
+		}
+		//If intensity is 0, again no modification to brightness
+		else if (intensity == 0) {
+			intensity = 1;
+		}
+		//If intensity value is in the accepted range, multiply with proper coefficient
+		else if (intensity > 0 && intensity <= 1){
+			intensity *= 1.9;
+		} else {
+			intensity = 1;
+			alert("Incorrect intensity of light, default value will be used. Value must be 0.0 - 1.0");
+		}
+	}
+	return intensity;
+		
+}
+
 function getMinMax(xml) {
 	//Get the minimum and maximum coordinates of the object. Coordinates are used
 	//to perform the inital translation, so that the object would be in view immediately
