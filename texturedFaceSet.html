@@ -188,13 +188,43 @@ canvas {
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-
+	//JATKA TASTA, else ifit loppuun
     var crateTexture;
 	function initTexture(e) {
         crateTexture = gl.createTexture();
         crateTexture.image = new Image();
+		imgHeight = crateTexture.image.height;
+		imgWidth = crateTexture.image.width;
         crateTexture.image.onload = function () {
-            handleLoadedTexture(crateTexture)
+			imgHeight = crateTexture.image.height;
+			imgWidth = crateTexture.image.width;
+			if(imgHeight >=8 && imgHeight <=16) {
+				if(imgHeight <=12) {
+					crateTexture.image.height = 8;
+				} else {
+					crateTexture.image.height = 16;
+				}
+			} else if(imgHeight >=8 && imgHeight <=16) {
+				if(imgHeight <=12) {
+					crateTexture.image.height = 8;
+				} else {
+					crateTexture.image.height = 16;
+				}
+			} else if(imgHeight >=8 && imgHeight <=16) {
+				if(imgHeight <=12) {
+					crateTexture.image.height = 8;
+				} else {
+					crateTexture.image.height = 16;
+				}
+			} else if(imgHeight >=8 && imgHeight <=16) {
+				if(imgHeight <=12) {
+					crateTexture.image.height = 8;
+				} else {
+					crateTexture.image.height = 16;
+				}
+			} else
+			alert(crateTexture.image.height);
+				handleLoadedTexture(crateTexture)
         }
 		if (e) {
 			crateTexture.image.src = URL.createObjectURL(e);

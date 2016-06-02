@@ -4,8 +4,6 @@ glmatrixissa on valmiit funktiot, testaa mita tarvitaan.
 
 TODO:
 
-
-
 (Secular light)
 (Parseta alkuarvot valolle x3dsta.)
 Näppisliikutuksen skaalaus(toimii periaatteessa, kiihtyy joka kerta kun lataa monta modelia ilman refreshia.)
