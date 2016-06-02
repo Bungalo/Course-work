@@ -4,6 +4,7 @@
 <style>
 
 canvas {
+	float:left;
 }
 #fps {
 	font-size: 20;
@@ -15,7 +16,7 @@ canvas {
 
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="mobile.js"></script>
+<script type="text/javascript" src="coordinateParser.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -69,8 +70,11 @@ canvas {
         } else {
             vec3 transformedNormal = uNMatrix * aVertexNormal;
             float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-            vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-        }
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+			//Gamma correction
+			//vec3 gamma = vec3(1.0/2.2);
+			//vLightWeighting = vec3(pow(linearColor, gamma));
+		}
     }
 </script>
 
@@ -130,7 +134,6 @@ canvas {
         return shader;
     }
 
-
     var shaderProgram;
 
     function initShaders() {
@@ -154,9 +157,10 @@ canvas {
         shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
 		gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 		
+
         shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
         gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
-		
+
 		shaderProgram.shapeColorAttribute = gl.getAttribLocation(shaderProgram, "aShapeColor");
 		gl.enableVertexAttribArray(shaderProgram.shapeColorAttribute);
 
@@ -165,8 +169,8 @@ canvas {
         shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
         shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
-        shaderProgram.useTextureUniform = gl.getUniformLocation(shaderProgram, "uUseTexture");
-		shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
+		shaderProgram.useTextureUniform = gl.getUniformLocation(shaderProgram, "uUseTexture");
+        shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
         shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
         shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
 		
@@ -186,7 +190,7 @@ canvas {
 
 
     var crateTexture;
-    function initTexture(e) {
+	function initTexture(e) {
         crateTexture = gl.createTexture();
         crateTexture.image = new Image();
         crateTexture.image.onload = function () {
@@ -316,6 +320,7 @@ canvas {
     var cubeVertexNormalBuffer;
     var cubeVertexTextureCoordBuffer;
     var cubeVertexIndexBuffer;
+	var colorBuffer;
 	
 	//Intialize buffers for vertex positions etc.
     function initBuffers() {
@@ -446,14 +451,14 @@ canvas {
 
         cubeVertexTextureCoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-		var textureCoords = [];
+        var textureCoords = [];
 		for (var i=0; i < cubeVertexPositionBuffer.numItems/3; i++) {
 			textureCoords.push("0","0");
 			textureCoords.push("1","0");
 			textureCoords.push("0.5","1");
 			
 		}
-        /*var textureCoords = [
+		/*var textureCoords = [
             // Front face
             0.0, 0.0,
             1.0, 0.0,
@@ -507,7 +512,6 @@ canvas {
 		colorBuffer.itemSize = 3;
 		colorBuffer.numItems = cubeVertexPositionBuffer.numItems;
 		
-		
     }
 
     function drawScene() {
@@ -551,10 +555,10 @@ canvas {
 		var useTexture = document.getElementById("texture").checked;
 		//alert(useTexture);
 		gl.uniform1i(shaderProgram.useTextureUniform, useTexture);
-		
-		//Ligthing magic happens here. See webgl lesson 7 for details
+		//Lighting magic happens here. See webgl lesson 7 for details
 		var lighting = document.getElementById("lighting").checked;
         gl.uniform1i(shaderProgram.useLightingUniform, lighting);
+		
         if (lighting) {
             gl.uniform3f(
                 shaderProgram.ambientColorUniform,
@@ -579,7 +583,7 @@ canvas {
                 parseFloat(document.getElementById("directionalB").value)
             );
         }
-		document.getElementById("ShowDirectionX").value=document.getElementById("lightDirectionX").value;
+			document.getElementById("ShowDirectionX").value=document.getElementById("lightDirectionX").value;
 			document.getElementById("ShowDirectionY").value=document.getElementById("lightDirectionY").value;
 			document.getElementById("ShowDirectionZ").value=document.getElementById("lightDirectionZ").value;
 			document.getElementById("ShowColorR").value=document.getElementById("directionalR").value;
@@ -605,10 +609,10 @@ canvas {
     }
 	var then = 0;
 	//Interval for updating fps value on the page, seconds
-	var fpsUpdateInterval = 1.0;
+	var fpsUpdateInterval = 0.5;
 	var fpsStartTime = 0;
     function tick() {
-		requestAnimFrame(tick);
+
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame ||
 		  window.webkitRequestAnimationFrame ||
@@ -622,7 +626,7 @@ canvas {
 		var fpsElement = document.getElementById("fps");
 		var elapsedTime = 0;
 		var fpsElapsedTime = 0;
-		var now = Date.now() / 1000;  // get time in seconds
+		var now = Date.now() / 1000.0;  // get time in seconds
 		// compute time since last frame
 		elapsedTime = now - then;
 		then = now;
@@ -633,29 +637,16 @@ canvas {
 		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
-			if (fps > 60) {
+			if (fps >60) {
 				fps = 60.0;
 			}
-			fpsElement.textContent = fps.toFixed(0);
-			fpsStartTime = Date.now() / 1000;
+			fpsElement.textContent= fps.toFixed(0);
+			fpsStartTime = Date.now() / 1000.0;
 		}
 		handleKeys();
 		drawScene();
-		animate();
+		requestAnimFrame(tick);
 	}
-	
-	var lastTime = 0;
-	var xRot = 0;
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime != 0) {
-            var elapsed = timeNow - lastTime;
-			var newRotationMatrix = mat4.create();
-            xRot = (90 * elapsed) / 1000.0;
-			mat4.rotate(triangleRotationMatrix, triangleRotationMatrix, degToRad(xRot), [0,1,0]);
-        }
-        lastTime = timeNow;
-    }
 	
     function webGLStart() {
 		var canvas = document.getElementById("canvas-for-webgl");
@@ -666,24 +657,23 @@ canvas {
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-		//window.onwheel = function(){ return false; }
 		canvas.onwheel = function(event){
 			handleMouseWheel(event);
 			event.preventDefault();
-		}; 
+		};
 		canvas.onmousedown = handleMouseDown;
 		document.onmouseup = handleMouseUp;
 		document.onmousemove = handleMouseMove;
 		document.onkeydown = handleKeyDown;
 		document.onkeyup = handleKeyUp;
-		
 		// Get time in seconds for fps counter
 		then = Date.now() / 1000;  
         tick();
 	}
-	function getReady(selection) {
-		handleFileSelect(selection);
+	function getReady() {
+		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 		document.getElementById('files2').addEventListener('change', handleTextureSelect, false);
+		document.getElementById("upload_form").reset();
 		document.getElementById("upload_form2").reset();
 		document.getElementById('texture').disabled= true;
 		document.getElementById('texture').checked= false;
@@ -714,42 +704,47 @@ canvas {
 		document.getElementById('texture').disabled= false;
 		document.getElementById('texture').checked= true;
 	}
-	function handleFileSelect(selection) {
-		document.getElementById('files2').addEventListener('change', handleTextureSelect, false);
+	function handleFileSelect(evt) {
+		document.getElementById('files2').style.visibility='visible';
+		document.getElementById('texture').disabled='true';
+		document.getElementById('textureLabel').style.visibility='visible';
 		document.getElementById("upload_form2").reset();
-		document.getElementById('texture').disabled= true;
-		document.getElementById('texture').checked= false;
-		document.getElementById('lighting').checked= true;
-		document.getElementById('lighting').disabled= false;
-		resetValues();
-		coordsFromXML = getCoordinates(selection);
-		normalsFromXML = getNormals(selection);
-		colorFromXML = getColor(selection);
-		var brightness = 0;
-		if (selection === "cow") {
-			brightness = 1.9;
-		} else {
-			brightness = 1;
-		}
-		for(var i in colorFromXML) {
-			colorFromXML[i] *= brightness;
-		}
-		//indexesFromXML = getIndexes();
-		minMaxCoords = getMinMax(selection);
-		resetValues();
-		//Initial zoom is stored in fourth index of the table
-		zoom = minMaxCoords[3];
-		if(zoom < -20) {
-			zoom *=2.8;
-		}
-		scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
-		if (scaleOfZoom > 1) {
-			scaleOfZoom *= 1.5;
-		}
-		amountOfMovement = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/50.0;
-		//alert(amountOfMovement);
-		
-		webGLStart();
+		fileDisplayArea.textContent = "";
+		var files = evt.target.files[0];
+		var fileType = /.x3d./;
+		xml = "";
+		if (files.type.match(fileType)) {
+			var reader = new FileReader();
+
+			reader.onload = function(e) {
+				xml = parseXml(reader.result);
+				coordsFromXML = getCoordinates(xml);
+				normalsFromXML = getNormals(xml);
+				colorFromXML = getColor(xml);
+				var brightness = getBrightness(xml);
+				for(var i in colorFromXML) {
+					colorFromXML[i] *= brightness;
+				}
+				minMaxCoords = getMinMax(xml);
+				resetValues();
+				//Initial zoom is stored in fourth index of the table
+				zoom = minMaxCoords[3];
+				if(zoom < -20) {
+					zoom *=2.8;
+				}
+				scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
+				if (scaleOfZoom > 1) {
+					scaleOfZoom *= 1.5;
+				}
+				amountOfMovement = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/50.0;
+				//alert(amountOfMovement);
+				var testiArray = [];
+				webGLStart();
+			}
+			reader.readAsText(files);
+	} else {
+		fileDisplayArea.textContent = "Only .x3d supported!"
+	}
 }
 	
 var parseXml;
@@ -775,24 +770,27 @@ if (typeof window.DOMParser != "undefined") {
 </head>
 
 
-<body onload="getReady('pyramid')"><br />
+<body onload="getReady()"><br />
 	<div id="left_panel"  style="float:left; width:500px;">
-
     <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
-	<p>
-	
-	<p>	&nbsp&nbsp&nbsp Use the buttons to change the model
-	
-    <br/>
     
-	<form id="upload_form2">
-	<p id = "textureLabel" >Choose texture<br/> (only works if the image width and height are a power of 2 (64,128,256 etc.)<br/> If you are seeing a black screen, scale your image)</p>
-	<input type="file" id="files2" name="files2[]"></input>
+	<form id="upload_form">
+	<p>Choose model</p>
+	<input type="file" id="files" name="files[]"/>
 	</form>
-	<h2>Directional light:</h2>
+	<output id="fileDisplayArea"></output>
+	<form id="upload_form2">
+	<p id = "textureLabel" style="visibility:hidden">Choose texture<br/> (only works if the image width and height are a power of 2 (64,128,256 etc.)<br/> If you are seeing a black screen, scale your image)</p>
+	<input style="visibility:hidden" type="file" id="files2" name="files2[]"></input>
+	</form>
+	</div>
+	<div id="contents"    style="float:left;">
+		<p>	&nbsp&nbsp&nbsp Use the mouse to spin the shape
+		<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
+		<h2>Directional light:</h2>
 
-    <table style="border: 0; padding: 10px;">
-        <tr>
+		<table style="border: 0; padding: 10px;">
+		<tr>
 			<td><b>Direction:</b>
 			<td>X: <input type="text" id="ShowDirectionX" disabled="disabled" value="" />
 			<td>Y: <input type="text" id="ShowDirectionY" disabled="disabled" value="" />
@@ -801,9 +799,9 @@ if (typeof window.DOMParser != "undefined") {
 		</tr>
         <tr>
 			<td><b></b>
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionX" value="-0.25" />
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionY" value="-0.25" />
-            <td><input type="range" min="-2" max="6" step="0.1" id="lightDirectionZ" value="-1.0" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionX" value="-0.25" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionY" value="-0.25" />
+            <td><input type="range" min="-4" max="4" step="0.1" id="lightDirectionZ" value="-1.0" />
         </tr>
 		<tr>
 			<td><b>Colour:</b>
@@ -818,38 +816,25 @@ if (typeof window.DOMParser != "undefined") {
             <td><input type="range" min="0" max="1" step="0.1" id="directionalG" value="0.8" />
             <td><input type="range" min="0" max="1" step="0.1" id="directionalB" value="0.8" />
         </tr>
-    </table>
+		</table>
 
-    <h2>Ambient light:</h2>
-    <table style="border: 0; padding: 10px;">
+		<h2>Ambient light:</h2>
+		<table style="border: 0; padding: 10px;">
 		<tr>
 			<td><b>Colour:</b>
 			<td>R: <input type="text" id="ShowAmbientR" disabled="disabled" value="" />
 			<td>G: <input type="text" id="ShowAmbientG" disabled="disabled" value="" />
 			<td>B: <input type="text" id="ShowAmbientB" disabled="disabled" value="" />
 		
-		</tr>
-        <tr>
+			</tr>
+			<tr>
             <td><b></b>
             <td><input type="range" min="0" max="1" step="0.1" id="ambientR" value="0.2" />
             <td><input type="range" min="0" max="1" step="0.1" id="ambientG" value="0.2" />
             <td><input type="range" min="0" max="1" step="0.1" id="ambientB" value="0.2" />
-        </tr>
-    </table>
-	</div>
-	<div id="contents"    style="float:left;">
-		<div>&nbsp&nbsp&nbspfps: &nbsp <span id="fps"></span></div>
-		<br/>
-		<br/>
-		<button type="button" onclick="getReady('bacteria')">Bacteria</button>
-		<br/>
-		<br/>
-		<button type="button" onclick="getReady('cow')">Cow</button>
-		<br/>
-		<br/>
-		<button type="button" onclick="getReady('pyramid')">Pyramid</button>
-		<br/>
-		<br/>
+			</tr>
+		</table>
+		<button type= "button" onclick="resetValues()">Reset</button><br/><br/>
 		<input type="checkbox" id="lighting" checked /> Use lighting<br/>
 		<input type="checkbox" id="texture" disabled="disabled"/> Use texture<br/>
 	</div>

@@ -1,32 +1,3 @@
-/*function handleFileSelectOLD(evt) {
-	fileDisplayArea.innerText = "";
-	var files = evt.target.files[0];
-	var fileType = /.x3d./;
-	var xml = "";
-	if (files.type.match(fileType)) {
-		var reader = new FileReader();
-
-		reader.onload = function(e) {
-			xml = parseXml(reader.result);
-			var mater = xml.getElementsByTagName('Material');
-			var coords = xml.getElementsByTagName('Coordinate');
-			var normals = xml.getElementsByTagName('Normal');
-			colorFromX = mater[0].getAttribute('diffuseColor');
-			colorFromX = colorFromX.replace(/ /g, ",");
-			colorFromX = colorFromX.replace(/\.0/g, "");
-			coordFromX = coords[0].getAttribute('point');
-			coordFromX = coordFromX.replace(/ |, /g, ",");
-			normFromX = normals[0].getAttribute('vector');
-			normFromX = normFromX.replace(/ |, /g, ",");
-			webGLStart();
-		}
-
-		reader.readAsText(files);
-	} else {
-		fileDisplayArea.innerText = "File not supported!"
-	}
-}
-*/
 function getCoordinates(xmlDocu) {
 	var indexes = xmlDocu.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
 	indexes = indexes.split(" ");
@@ -48,16 +19,6 @@ function getCoordinates(xmlDocu) {
 	}
 	//alert("FullCoords: " +fullCoords.length);
 	return fullCoords;
-}
-function getIndexes () {
-	var indexes = [0, 1, 2, -1, 0, 2, 3, -1, 1, 0, 4, -1, 0, 3, 4, -1, 3, 2, 4, -1, 2, 1, 4, -1];
-	for (var i in indexes) {
-		if (indexes[i] == -1) {
-			indexes.splice(i,1);
-		}
-	}
-	//alert("GetIndexes: "+indexes + " " + indexes.length);
-	return indexes;
 }
 
 function getNormals(xml) {
