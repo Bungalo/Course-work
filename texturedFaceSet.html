@@ -17,6 +17,7 @@ canvas {
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="coordinateParser.js"></script>
+<script type="text/javascript" src="checkDimensions.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -184,50 +185,31 @@ canvas {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
         gl.generateMipmap(gl.TEXTURE_2D);
-
+		
+		// Parameters to enable loading of any sized image as a texture
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-	//JATKA TASTA, else ifit loppuun
     var crateTexture;
 	function initTexture(e) {
         crateTexture = gl.createTexture();
         crateTexture.image = new Image();
-		imgHeight = crateTexture.image.height;
-		imgWidth = crateTexture.image.width;
         crateTexture.image.onload = function () {
-			imgHeight = crateTexture.image.height;
-			imgWidth = crateTexture.image.width;
-			if(imgHeight >=8 && imgHeight <=16) {
-				if(imgHeight <=12) {
-					crateTexture.image.height = 8;
-				} else {
-					crateTexture.image.height = 16;
-				}
-			} else if(imgHeight >=8 && imgHeight <=16) {
-				if(imgHeight <=12) {
-					crateTexture.image.height = 8;
-				} else {
-					crateTexture.image.height = 16;
-				}
-			} else if(imgHeight >=8 && imgHeight <=16) {
-				if(imgHeight <=12) {
-					crateTexture.image.height = 8;
-				} else {
-					crateTexture.image.height = 16;
-				}
-			} else if(imgHeight >=8 && imgHeight <=16) {
-				if(imgHeight <=12) {
-					crateTexture.image.height = 8;
-				} else {
-					crateTexture.image.height = 16;
-				}
-			} else
-			alert(crateTexture.image.height);
-				handleLoadedTexture(crateTexture)
+			//Code for scaling the image. Currently not working.
+			//crateTexture.image.width = checkImageWidth(crateTexture.image.width);
+			//crateTexture.image.height = checkImageHeight(crateTexture.image.height);
+			//alert(crateTexture.image.width + " " + crateTexture.image.height);
+			
+			handleLoadedTexture(crateTexture)
         }
 		if (e) {
 			crateTexture.image.src = URL.createObjectURL(e);
+			
 		}
 	}
 
@@ -805,12 +787,12 @@ if (typeof window.DOMParser != "undefined") {
     <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
     
 	<form id="upload_form">
-	<p>Choose model</p>
+	<p>Choose model (only .x3d)</p>
 	<input type="file" id="files" name="files[]"/>
 	</form>
 	<output id="fileDisplayArea"></output>
 	<form id="upload_form2">
-	<p id = "textureLabel" style="visibility:hidden">Choose texture<br/> (only works if the image width and height are a power of 2 (64,128,256 etc.)<br/> If you are seeing a black screen, scale your image)</p>
+	<p id = "textureLabel" style="visibility:hidden">Choose texture (any image file)<br/>
 	<input style="visibility:hidden" type="file" id="files2" name="files2[]"></input>
 	</form>
 	</div>

@@ -180,7 +180,13 @@ canvas {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
         gl.generateMipmap(gl.TEXTURE_2D);
-
+		
+		// Parameters to enable loading of any sized image as a texture
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
@@ -284,7 +290,6 @@ canvas {
     function handleKeyDown(event) {
         currentlyPressedKeys[event.keyCode] = true;
     }
-
 
     function handleKeyUp(event) {
         currentlyPressedKeys[event.keyCode] = false;
@@ -781,12 +786,12 @@ if (typeof window.DOMParser != "undefined") {
     <canvas id="canvas-for-webgl" style="border: none;" width="500" height="500"></canvas>
 	<p>
 	
-	<p>	&nbsp&nbsp&nbsp Use the buttons to change the model
+	<p>	&nbsp&nbsp&nbsp Use the buttons on the right to change the model
 	
     <br/>
     
 	<form id="upload_form2">
-	<p id = "textureLabel" >Choose texture<br/> (only works if the image width and height are a power of 2 (64,128,256 etc.)<br/> If you are seeing a black screen, scale your image)</p>
+	<p id = "textureLabel" >Choose texture (any image file)<br/>
 	<input type="file" id="files2" name="files2[]"></input>
 	</form>
 	<h2>Directional light:</h2>
