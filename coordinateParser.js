@@ -17,7 +17,7 @@ function getCoordinates(xmlDocu) {
 			}
 		}
 	}
-	//alert("FullCoords: " +fullCoords.length);
+	alert("FullCoords: " +fullCoords.length/9);
 	return fullCoords;
 }
 
