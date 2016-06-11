@@ -17,7 +17,6 @@ canvas {
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="coordinateParser.js"></script>
-<script type="text/javascript" src="checkDimensions.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -94,7 +93,6 @@ canvas {
             alert("Could not initialise WebGL, sorry :-(");
         }
     }
-
 
     function getShader(gl, id) {
         var shaderScript = document.getElementById(id);
@@ -553,6 +551,7 @@ canvas {
 		document.getElementById("ambientR").value="0.2";
 		document.getElementById("ambientG").value="0.2";
 		document.getElementById("ambientB").value="0.2";
+		document.getElementById('texture').checked=false;
 	}
 	function handleTextureSelect(evt) {
 		var files = evt.target.files[0];
@@ -562,9 +561,10 @@ canvas {
 	}
 	function handleFileSelect(evt) {
 		document.getElementById('files2').style.visibility='visible';
-		document.getElementById('texture').disabled='true';
+		document.getElementById('texture').disabled=true;
 		document.getElementById('textureLabel').style.visibility='visible';
 		document.getElementById("upload_form2").reset();
+		document.getElementById('texture').checked=false;
 		fileDisplayArea.textContent = "";
 		var files = evt.target.files[0];
 		var fileType = /.x3d./;

@@ -46,14 +46,7 @@ function getNormals(xml) {
 	for (var i=0; i<fullCoords.length; i+=9) {
 		vec3.set(vector1, fullCoords[i+6]-fullCoords[i], fullCoords[i+7]-fullCoords[i+1], fullCoords[i+8]-fullCoords[i+2]);
 		vec3.set(vector2, fullCoords[i+3]-fullCoords[i], fullCoords[i+4]-fullCoords[i+1], fullCoords[i+5]-fullCoords[i+2]);
-		/*alert(fullCoords[i+6]+" "+fullCoords[i]);
-		alert(fullCoords[i+7]+" "+fullCoords[i+1]);
-		alert(fullCoords[i+8]+" "+fullCoords[i+2]);
-		alert(fullCoords[i+3]+" "+fullCoords[i]);
-		alert(fullCoords[i+4]+" "+fullCoords[i+1]);
-		alert(fullCoords[i+5]+" "+fullCoords[i+2]);
-		alert("Vec1: "+vector1[0]+" "+vector1[1]+" "+vector1[2]);
-		alert("Vec2: "+vector2[0]+" "+vector2[1]+" "+vector2[2]);*/
+
 		vec3.cross(cross, vector1, vector2);
 		vec3.normalize(normal, cross);
 		normals.push(normal[0]);
