@@ -20,7 +20,19 @@ function getCoordinates(xmlDocu) {
 	//alert("FullCoords: " +fullCoords.length);
 	return fullCoords;
 }
-
+function getIndices(xml) {
+	var indexes = xml.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
+	indexes = indexes.split(" ");
+	var cleaned= [];
+	for (i in indexes) {
+		
+		if (indexes[i] != -1) {
+			cleaned.push(indexes[i]);
+		}
+	}
+	alert(cleaned);
+	return cleaned;
+}
 function getNormals(xml) {
 	var indexes = xml.getElementsByTagName('IndexedFaceSet')[0].getAttribute('coordIndex');
 	indexes = indexes.split(" ");

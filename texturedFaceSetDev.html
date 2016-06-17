@@ -17,6 +17,7 @@ canvas {
 <script type="text/javascript" src="gl-matrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="coordinateParser.js"></script>
+<script type="text/javascript" src="checkDimensions.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -64,12 +65,16 @@ canvas {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
         vTextureCoord = aTextureCoord;
 		vShapeColor = aShapeColor;
+		//vLightWeighting = vec3(1.0, 1.0, 1.0);
        if (!uUseLighting) {
             vLightWeighting = vec3(1.0, 1.0, 1.0);
         } else {
             vec3 transformedNormal = uNMatrix * aVertexNormal;
             float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
 			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+			//Gamma correction
+			//vec3 gamma = vec3(1.0/2.2);
+			//vLightWeighting = vec3(pow(linearColor, gamma));
 		}
     }
 </script>
@@ -81,17 +86,21 @@ canvas {
 	var coordsFromXML;
 	var colorFromXML;
 	var normalsFromXML;
+	var indicesFromXML;
 	var minMaxCoords;
+	
     function initGL(canvas) {
-		gl = WebGLUtils.setupWebGL(canvas);
-       /* try {
+        try {
             gl = canvas.getContext("experimental-webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
         } catch (e) {
         }
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
-        }*/
+        }
     }
+
 
     function getShader(gl, id) {
         var shaderScript = document.getElementById(id);
@@ -150,6 +159,7 @@ canvas {
 
         shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
 		gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+		
 
         shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
         gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
@@ -192,13 +202,19 @@ canvas {
         crateTexture = gl.createTexture();
         crateTexture.image = new Image();
         crateTexture.image.onload = function () {
-		handleLoadedTexture(crateTexture)
+			//Code for scaling the image. Currently not working.
+			//crateTexture.image.width = checkImageWidth(crateTexture.image.width);
+			//crateTexture.image.height = checkImageHeight(crateTexture.image.height);
+			//alert(crateTexture.image.width + " " + crateTexture.image.height);
+			
+			handleLoadedTexture(crateTexture)
         }
 		if (e) {
 			crateTexture.image.src = URL.createObjectURL(e);
 			
 		}
 	}
+
 
     var mvMatrix = mat4.create();
     var mvMatrixStack = [];
@@ -217,6 +233,7 @@ canvas {
         mvMatrix = mvMatrixStack.pop();
     }
 
+
     function setMatrixUniforms() {
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
@@ -227,6 +244,7 @@ canvas {
         mat3.transpose(normalMatrix, normalMatrix);
         gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
     }
+
 
     function degToRad(degrees) {
         return degrees * Math.PI / 180;
@@ -323,30 +341,125 @@ canvas {
 		//Create buffer and make it active
         cubeVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        vertices = coordsFromXML
+        vertices = coordsFromXML/*[
 		
+			// Front face
+             0.0,  1.0,  0.0,
+            -1.0, -1.0,  1.0,
+             1.0, -1.0,  1.0,
+
+            // Right face
+             0.0,  1.0,  0.0,
+             1.0, -1.0,  1.0,
+             1.0, -1.0, -1.0,
+
+            // Back face
+             0.0,  1.0,  0.0,
+             1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0,
+
+            // Left face
+             0.0,  1.0,  0.0,
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+			
+			//Bottom1
+			-1.0, -1.0,  1.0,
+			 1.0, -1.0,  1.0,
+			 1.0, -1.0, -1.0,
+			//Bottom2
+			-1.0, -1.0,  1.0,
+			 1.0, -1.0, -1.0,
+			-1.0, -1.0, -1.0]*/;
+		
+		/*vertices = vertices.concat(coordFromX.split(","));
+		vertices = vertices.concat(coordFromX.split(","));
+		vertices[11] = -0.001;
+		vertices[14] = -0.001;
+		vertices[17] = -0.001;*/
+		/*vertices = vertices.concat(0.0,  1.0,  -0.001,
+									-1.0, -1.0,  -0.001,
+									 1.0, -1.0,  -0.001);*/
 		//Push the data into the buffer
 		//numitems should be the number of rows, i.e number of points
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         cubeVertexPositionBuffer.itemSize = 3;
         cubeVertexPositionBuffer.numItems = coordsFromXML.length/ 3;
 		
 		cubeVertexIndexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 		var cubeVertexIndices = [];
-		for(i = 0; i<cubeVertexPositionBuffer.numItems;i++) {
+		cubeVertexIndices = indicesFromXML;
+		/*for(i = 0; i<cubeVertexPositionBuffer.numItems;i++) {
 			cubeVertexIndices.push(i);
-		}
-
+		}*/
+		//alert(cubeVertexIndices.length);
+		//alert(cubeVertexIndices+" "+cubeVertexIndices.length);
+		/*var cubeVertexIndices = [
+		
+			0,1,2,
+			3,4,5,
+			6,7,8,
+			9,10,11,
+			12,13,14,
+			15,16,17*/
+			
+			/*0, 1, 2,
+			0, 2, 3,
+			0, 3, 4,
+			0, 4, 1,
+			1, 2, 3,
+			1, 3, 4*/
+		//];
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
 		cubeVertexIndexBuffer.itemSize = 1;
-		cubeVertexIndexBuffer.numItems = cubeVertexPositionBuffer.numItems;
+		cubeVertexIndexBuffer.numItems = cubeVertexIndices.length;
 
         cubeVertexNormalBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-
-        var vertexNormals = normalsFromXML;
+		var normal1 = vec3.create();
+		var normal2 = vec3.create();
+		var normal3 = vec3.create();
+		var normal4 = vec3.create();
+		var normal5 = vec3.create();
 		
+		vec3.normalize(normal1, [0,2,4]);
+		vec3.normalize(normal2, [4,2,0]);
+		vec3.normalize(normal3, [0,2,-4]);
+		vec3.normalize(normal4, [-4,2,0]);
+		vec3.normalize(normal5, [0,-1,0]);
+        var vertexNormals = normalsFromXML/*[
+			// Front
+			normal1[0], normal1[1], normal1[2],
+			normal1[0], normal1[1], normal1[2],
+			normal1[0], normal1[1], normal1[2],
+			// Right
+			normal2[0], normal2[1], normal2[2],
+			normal2[0], normal2[1], normal2[2],
+			normal2[0], normal2[1], normal2[2],	
+			// Back
+			normal3[0], normal3[1], normal3[2],
+			normal3[0], normal3[1], normal3[2],
+			normal3[0], normal3[1], normal3[2],
+			// Left
+			normal4[0], normal4[1], normal4[2],
+			normal4[0], normal4[1], normal4[2],
+			normal4[0], normal4[1], normal4[2],
+			// Bottom1
+			normal5[0], normal5[1], normal5[2],
+			normal5[0], normal5[1], normal5[2],
+			normal5[0], normal5[1], normal5[2],
+			// Bottom2
+			normal5[0], normal5[1], normal5[2],
+			normal5[0], normal5[1], normal5[2],
+			normal5[0], normal5[1], normal5[2]];*/
+            /*// Front face
+            vertexNormals = vertexNormals.concat(normFromX.split(","));
+			
+			//Back face
+			 vertexNormals = vertexNormals.concat(0.0,  0.0,  -1.0,
+												  0.0,  0.0,  -1.0,
+												  0.0,  0.0,  -1.0);*/
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
         cubeVertexNormalBuffer.itemSize = 3;
         cubeVertexNormalBuffer.numItems = normalsFromXML.length/ 3;
@@ -360,7 +473,17 @@ canvas {
 			textureCoords.push("0.5","1");
 			
 		}
-
+		/*var textureCoords = [
+            // Front face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+		
+			//Back face
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0
+        ];*/
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
         cubeVertexTextureCoordBuffer.itemSize = 2;
         cubeVertexTextureCoordBuffer.numItems = cubeVertexPositionBuffer.numItems;
@@ -373,7 +496,33 @@ canvas {
 			colorVals.push(colorFromXML[1]);
 			colorVals.push(colorFromXML[2]);
 		}	
-
+		
+		/*var colorVals = [
+		//Bottom2
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 1.0,
+		//Bottom1
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 1.0,
+		//Back
+		0.0, 1.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 1.0, 0.0,
+		//Left
+		0.0, 0.0, 1.0,
+		0.0, 0.0, 1.0,
+		0.0, 0.0, 1.0,
+		//Right
+		1.0, 1.0, 0.0,
+		1.0, 1.0, 0.0,
+		1.0, 1.0, 0.0,
+		//Front
+		1.0, 0.0, 0.0,
+		1.0, 0.0, 0.0,
+		1.0, 0.0, 0.0,
+		];*/
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorVals), gl.STATIC_DRAW);
 		colorBuffer.itemSize = 3;
 		colorBuffer.numItems = cubeVertexPositionBuffer.numItems;
@@ -381,15 +530,16 @@ canvas {
     }
 
     function drawScene() {
-		gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        mat4.perspective(pMatrix, 45, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 1000.0);
+
+        mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
 
         mat4.identity(mvMatrix);
 		//Starting coordinates for viewport
 		var translationVar = vec3.create();
 		vec3.set(translationVar, -1*minMaxCoords[0]+moveX, -1*minMaxCoords[1]+moveY, -1*minMaxCoords[2]+zoom);
+		//vec3.set(translationVar, 0, 0, zoom);
         mat4.translate(mvMatrix, mvMatrix, translationVar);
 		
 		//Make shape spin around it's own center. Move, rotate, move back
@@ -418,6 +568,7 @@ canvas {
 		gl.vertexAttribPointer(shaderProgram.shapeColorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
 		var useTexture = document.getElementById("texture").checked;
+		//alert(useTexture);
 		gl.uniform1i(shaderProgram.useTextureUniform, useTexture);
 		//Lighting magic happens here. See webgl lesson 7 for details
 		var lighting = document.getElementById("lighting").checked;
@@ -447,28 +598,36 @@ canvas {
                 parseFloat(document.getElementById("directionalB").value)
             );
         }
-		document.getElementById("ShowDirectionX").value=document.getElementById("lightDirectionX").value;
-		document.getElementById("ShowDirectionY").value=document.getElementById("lightDirectionY").value;
-		document.getElementById("ShowDirectionZ").value=document.getElementById("lightDirectionZ").value;
-		document.getElementById("ShowColorR").value=document.getElementById("directionalR").value;
-		document.getElementById("ShowColorG").value=document.getElementById("directionalG").value;
-		document.getElementById("ShowColorB").value=document.getElementById("directionalB").value;
-		document.getElementById("ShowAmbientR").value=document.getElementById("ambientR").value;
-		document.getElementById("ShowAmbientG").value=document.getElementById("ambientG").value;
-		document.getElementById("ShowAmbientB").value=document.getElementById("ambientB").value;
+			document.getElementById("ShowDirectionX").value=document.getElementById("lightDirectionX").value;
+			document.getElementById("ShowDirectionY").value=document.getElementById("lightDirectionY").value;
+			document.getElementById("ShowDirectionZ").value=document.getElementById("lightDirectionZ").value;
+			document.getElementById("ShowColorR").value=document.getElementById("directionalR").value;
+			document.getElementById("ShowColorG").value=document.getElementById("directionalG").value;
+			document.getElementById("ShowColorB").value=document.getElementById("directionalB").value;
+			document.getElementById("ShowAmbientR").value=document.getElementById("ambientR").value;
+			document.getElementById("ShowAmbientG").value=document.getElementById("ambientG").value;
+			document.getElementById("ShowAmbientB").value=document.getElementById("ambientB").value;
+		/*var adjustedLD = vec3.create();
+        vec3.normalize(adjustedLD, [0, 0, 1.0]);
+        vec3.scale(adjustedLD, adjustedLD, -1);
+		gl.uniform1i(shaderProgram.useLightingUniform, true);
+		gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
+        gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.8, 0.8 , 0.8);*/
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
         setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        //gl.drawArrays(gl.TRIANGLES,0, cubeVertexPositionBuffer.numItems);
+		
+		
     }
-	
 	var then = 0;
 	//Interval for updating fps value on the page, seconds
 	var fpsUpdateInterval = 0.5;
 	var fpsStartTime = 0;
     function tick() {
-	
-		requestAnimFrame(tick);
+
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame ||
 		  window.webkitRequestAnimationFrame ||
@@ -486,9 +645,11 @@ canvas {
 		// compute time since last frame
 		elapsedTime = now - then;
 		then = now;
-		fpsElapsedTime = now-fpsStartTime;
-
+		//alert("First: "+fpsElapsedTime);
+		fpsElapsedTime = now-fpsStartTime;;
+		//alert("Second: "+fpsElapsedTime);
 		// Check if enough time has passed, compute fps and display it on the page
+		
 		if(fpsElapsedTime > fpsUpdateInterval) {
 			var fps = 1 / elapsedTime;
 			if (fps >60) {
@@ -499,13 +660,7 @@ canvas {
 		}
 		handleKeys();
 		drawScene();
-		/*
-		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-		/var vertices = coordsFromXML;
-		vertices.reverse();
-		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices));
-		deleteThisCounter++;
-		}*/
+		requestAnimFrame(tick);
 	}
 	
     function webGLStart() {
@@ -557,7 +712,6 @@ canvas {
 		document.getElementById("ambientR").value="0.2";
 		document.getElementById("ambientG").value="0.2";
 		document.getElementById("ambientB").value="0.2";
-		document.getElementById('texture').checked=false;
 	}
 	function handleTextureSelect(evt) {
 		var files = evt.target.files[0];
@@ -567,10 +721,9 @@ canvas {
 	}
 	function handleFileSelect(evt) {
 		document.getElementById('files2').style.visibility='visible';
-		document.getElementById('texture').disabled=true;
+		document.getElementById('texture').disabled='true';
 		document.getElementById('textureLabel').style.visibility='visible';
 		document.getElementById("upload_form2").reset();
-		document.getElementById('texture').checked=false;
 		fileDisplayArea.textContent = "";
 		var files = evt.target.files[0];
 		var fileType = /.x3d./;
@@ -583,6 +736,7 @@ canvas {
 				coordsFromXML = getCoordinates(xml);
 				normalsFromXML = getNormals(xml);
 				colorFromXML = getColor(xml);
+				indicesFromXML = getIndices(xml);
 				var brightness = getBrightness(xml);
 				for(var i in colorFromXML) {
 					colorFromXML[i] *= brightness;
@@ -594,12 +748,12 @@ canvas {
 				if(zoom < -20) {
 					zoom *=2.8;
 				}
-				//Calculate the "amount" zoomed when mouse wheel is scrolled
 				scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
 				if (scaleOfZoom > 1) {
 					scaleOfZoom *= 1.5;
 				}
 				amountOfMovement = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/50.0;
+				//alert(amountOfMovement);
 				var testiArray = [];
 				webGLStart();
 			}
