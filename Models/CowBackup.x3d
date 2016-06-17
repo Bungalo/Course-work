@@ -9,7 +9,7 @@
 		<!-- 0.625 0.390625 0.0 -->
           <Material diffuseColor='0.625 0.390625 0.0' />
         </Appearance>
-        <IndexedFaceSet creaseAngle='0' coordIndex='
+        <IndexedFaceSet creaseAngle='0.2' coordIndex='
 		639 627 1890 -1 
 		639 1890 1878 -1 
 		681 987 1889 -1 

@@ -83,15 +83,14 @@ canvas {
 	var normalsFromXML;
 	var minMaxCoords;
     function initGL(canvas) {
-        try {
+		gl = WebGLUtils.setupWebGL(canvas);
+       /* try {
             gl = canvas.getContext("experimental-webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
         } catch (e) {
         }
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
-        }
+        }*/
     }
 
     function getShader(gl, id) {
@@ -151,7 +150,6 @@ canvas {
 
         shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
 		gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-		
 
         shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
         gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
@@ -329,7 +327,7 @@ canvas {
 		
 		//Push the data into the buffer
 		//numitems should be the number of rows, i.e number of points
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
         cubeVertexPositionBuffer.itemSize = 3;
         cubeVertexPositionBuffer.numItems = coordsFromXML.length/ 3;
 		
@@ -383,10 +381,10 @@ canvas {
     }
 
     function drawScene() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        //gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 1000.0);
+        mat4.perspective(pMatrix, 45, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 1000.0);
 
         mat4.identity(mvMatrix);
 		//Starting coordinates for viewport
@@ -588,6 +586,7 @@ canvas {
 				if(zoom < -20) {
 					zoom *=2.8;
 				}
+				//Calculate the "amount" zoomed when mouse wheel is scrolled
 				scaleOfZoom = (minMaxCoords[0]+minMaxCoords[1]+minMaxCoords[2])/9.0;
 				if (scaleOfZoom > 1) {
 					scaleOfZoom *= 1.5;
